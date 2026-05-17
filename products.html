@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منتجاتنا | Rekaz - حلول برمجية ذكية</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Cairo for Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Config for Luxury Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        rekaz: {
+                            primary: '#7a42c5', // New Purple Color
+                            dark: '#050505',
+                            accent: '#1a1a1a',
+                            light: '#f5f5f5',
+                            glass: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 6s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #050505;
+            color: #f5f5f5;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Light Mode Styles */
+        body.light-mode {
+            background-color: #f5f5f5;
+            color: #1a1a1a;
+        }
+
+        body.light-mode .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .glass-card:hover {
+            background: rgba(122, 66, 197, 0.1);
+            border-color: #7a42c5;
+        }
+
+        body.light-mode #canvas-bg {
+            opacity: 0.2;
+        }
+
+        body.light-mode .text-white {
+            color: #1a1a1a !important;
+        }
+
+        body.light-mode .text-gray-300,
+        body.light-mode .text-gray-400 {
+            color: #4a4a4a !important;
+        }
+
+        body.light-mode .bg-rekaz-accent {
+            background-color: #e5e5e5 !important;
+        }
+
+        body.light-mode .bg-rekaz-dark {
+            background-color: #ffffff !important;
+        }
+
+        body.light-mode .border-gray-800 {
+            border-color: #d1d1d1 !important;
+        }
+
+        body.light-mode .text-gray-600 {
+            color: #666666 !important;
+        }
+
+        body.light-mode .bg-gray-900 {
+            background-color: #e0e0e0 !important;
+        }
+
+        body.light-mode .border-gray-700 {
+            border-color: #cccccc !important;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7a42c5; /* Purple thumb */
+            border-radius: 5px;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+        }
+        .glass-card:hover {
+            background: rgba(122, 66, 197, 0.1); /* Slight purple tint on hover */
+            border-color: #7a42c5;
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Text Gradient */
+        .text-gradient {
+            background: linear-gradient(to right, #7a42c5, #b589f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .primary-gradient-bg {
+            background: linear-gradient(45deg, #7a42c5, #582a9e);
+        }
+
+        /* Background Canvas */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Reveal on Scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.4s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Background Animation Canvas -->
+    <canvas id="canvas-bg"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-24">
+                <!-- Logo -->
+                <div class="flex-shrink-0 cursor-pointer">
+                    <a href="index.html">
+                        <img src="logo.png" alt="REKAZ Logo" class="h-12 md:h-16">
+                    </a>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
+                        <a href="index.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white transition-colors">الرئيسية</a>
+                        <a href="index.html#about" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white transition-colors">من نحن</a>
+                        <a href="index.html#services" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white transition-colors">خدماتنا</a>
+                        <a href="products.html" class="px-3 py-2 rounded-md text-sm font-bold text-white hover:text-rekaz-primary transition-colors">منتجاتنا</a>
+                        <button onclick="toggleTheme()" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white transition-colors" id="theme-toggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <a href="index.html#contact" class="px-5 py-2 rounded-full text-sm font-bold bg-rekaz-primary text-white hover:bg-white hover:text-rekaz-primary transition-all shadow-lg hover:shadow-purple-500/20">تواصل معنا</a>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button onclick="toggleMenu()" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 text-center">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">الرئيسية</a>
+                <a href="index.html#services" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">خدماتنا</a>
+                <a href="products.html" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-rekaz-primary">منتجاتنا</a>
+                <a href="index.html#contact" class="block px-3 py-2 rounded-md text-base font-medium text-rekaz-primary">تواصل معنا</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section for Products Page -->
+    <section class="pt-40 pb-20 relative overflow-hidden">
+        <div class="absolute top-1/4 left-10 w-72 h-72 bg-rekaz-primary opacity-20 rounded-full filter blur-3xl animate-pulse-slow"></div>
+        <div class="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-900 opacity-10 rounded-full filter blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
+
+        <div class="text-center z-10 px-4 max-w-4xl mx-auto">
+            <div class="inline-block px-4 py-1 mb-4 border border-rekaz-primary/30 rounded-full bg-rekaz-primary/10 backdrop-blur-sm reveal">
+                <span class="text-rekaz-primary text-sm tracking-widest uppercase font-bold">منتجاتنا الجاهزة</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight reveal" style="transition-delay: 0.2s;">
+                منظومات <span class="text-gradient">برمجية</span><br>متكاملة وجاهزة
+            </h1>
+            <p class="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-10 reveal" style="transition-delay: 0.4s;">
+                مجموعة من الحلول البرمجية الاحترافية الجاهزة للعمل فوراً، مصممة خصيصاً لتغطية احتياجات مختلف القطاعات وتسريع نمو مؤسستك.
+            </p>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Product 1: Rukn Sales System -->
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group reveal">
+                    <div class="absolute top-0 right-0 bg-rekaz-primary w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-all"></div>
+                    
+                    <!-- Icon -->
+                    <div class="w-20 h-20 rounded-full primary-gradient-bg flex items-center justify-center mb-6 shadow-lg shadow-purple-600/20 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-cash-register text-3xl text-white"></i>
+                    </div>
+                    
+                    <!-- Title -->
+                    <h3 class="text-2xl font-bold text-white mb-4">تصميم  مواقع</h3>
+                    
+                    <!-- Description -->
+<p class="text-gray-400 mb-6 leading-relaxed">
+    نقدم خدمات تصميم وتطوير مواقع إلكترونية احترافية حسب الطلب، بتصاميم عصرية وتجربة استخدام مميزة تناسب هوية نشاطك التجاري وتساعدك على بناء حضور رقمي قوي واحترافي.
+</p>
+
+<!-- Features List -->
+<ul class="space-y-3 mb-8">
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-rekaz-primary ml-2 mt-1"></i>
+        <span>تصميمات حديثة ومتجاوبة مع جميع الأجهزة</span>
+    </li>
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-rekaz-primary ml-2 mt-1"></i>
+        <span>تطوير مواقع مخصصة حسب احتياجات العميل</span>
+    </li>
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-rekaz-primary ml-2 mt-1"></i>
+        <span>تهيئة المواقع لتوافق متطلبات مصرف ليبيا المركزي (CBL)</span>
+    </li>
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-rekaz-primary ml-2 mt-1"></i>
+        <span>توفير بريد إلكتروني رسمي وربط الدومين والاستضافة</span>
+    </li>
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-rekaz-primary ml-2 mt-1"></i>
+        <span>تجهيز المواقع وفق متطلبات المركز الليبي للاعتماد</span>
+    </li>
+</ul>
+
+<!-- CTA Button -->
+<a href="http://wa.me/218927597832" class="block w-full text-center px-6 py-3 rounded-full primary-gradient-bg text-white font-bold shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40 transform hover:scale-105 transition-all">
+    اطلب موقعك الآن
+</a>
+                </div>
+
+                <!-- Product 2: Car Showroom Management System -->
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group reveal" style="transition-delay: 0.1s;">
+                    <div class="absolute top-0 right-0 bg-blue-500 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-all"></div>
+                    
+                    <!-- Icon -->
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-6 shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-car text-3xl text-white"></i>
+                    </div>
+                    
+                    <!-- Title -->
+                    <h3 class="text-2xl font-bold text-white mb-4">نظام إدارة معارض السيارات</h3>
+                    
+                    <!-- Description -->
+<p class="text-gray-400 mb-6 leading-relaxed">
+    منظومة متكاملة لإدارة معارض السيارات تساعد على تنظيم عمليات البيع وإدارة السيارات والعملاء والأقساط والمصروفات ضمن واجهة حديثة وسهلة الاستخدام، مع إمكانية التشغيل محليًا أو عبر الإنترنت من أي جهاز.
+</p>
+
+<!-- Features List -->
+<ul class="space-y-3 mb-8">
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-blue-400 ml-2 mt-1"></i>
+        <span>إدارة السيارات والمبيعات والحجوزات بشكل احترافي</span>
+    </li>
+
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-blue-400 ml-2 mt-1"></i>
+        <span>دعم البيع النقدي والتقسيط وتتبع الدفعات والأقساط</span>
+    </li>
+
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-blue-400 ml-2 mt-1"></i>
+        <span>إدارة العملاء واحتساب نسب الباعة والعمولات تلقائيًا</span>
+    </li>
+
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-blue-400 ml-2 mt-1"></i>
+        <span>تقارير تفصيلية للمبيعات والأرباح والمصروفات</span>
+    </li>
+
+    <li class="flex items-start text-gray-300 text-sm">
+        <i class="fas fa-check-circle text-blue-400 ml-2 mt-1"></i>
+        <span>صلاحيات مستخدمين وأمان عالي لحماية البيانات</span>
+    </li>
+</ul>
+
+
+                    
+                    <!-- CTA Button -->
+                    <a href="index.html#contact" class="block w-full text-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 transform hover:scale-105 transition-all">
+                        اطلب عرض توضيحي
+                    </a>
+                </div>
+
+                <!-- Product 3: School Management System -->
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group reveal" style="transition-delay: 0.2s;">
+                    <div class="absolute top-0 right-0 bg-pink-500 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-all"></div>
+                    
+                    <!-- Icon -->
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-pink-700 flex items-center justify-center mb-6 shadow-lg shadow-pink-600/20 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-graduation-cap text-3xl text-white"></i>
+                    </div>
+                    
+                    <!-- Title -->
+                    <h3 class="text-2xl font-bold text-white mb-4">نظام إدارة المدارس</h3>
+                    
+                    <!-- Description -->
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        حل متكامل لإدارة المؤسسات التعليمية، يشمل: إدارة الطلاب، الفصول، المعلمين، الاختبارات، والنتائج الأكاديمية بكل سهولة.
+                    </p>
+                    
+                    <!-- Features List -->
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-start text-gray-300 text-sm">
+                            <i class="fas fa-check-circle text-pink-400 ml-2 mt-1"></i>
+                            <span>إدارة الطلاب والتسجيل</span>
+                        </li>
+                        <li class="flex items-start text-gray-300 text-sm">
+                            <i class="fas fa-check-circle text-pink-400 ml-2 mt-1"></i>
+                            <span>جدولة الفصول والحصص الدراسية</span>
+                        </li>
+                        <li class="flex items-start text-gray-300 text-sm">
+                            <i class="fas fa-check-circle text-pink-400 ml-2 mt-1"></i>
+                            <span>إدارة المعلمين والموظفين</span>
+                        </li>
+                        <li class="flex items-start text-gray-300 text-sm">
+                            <i class="fas fa-check-circle text-pink-400 ml-2 mt-1"></i>
+                            <span>متابعة الاختبارات والنتائج</span>
+                        </li>
+                    </ul>
+                    
+                    <!-- CTA Button -->
+                    <a href="" class="block w-full text-center px-6 py-3 rounded-full bg-gradient-to-r from-pink-500 to-pink-700 text-white font-bold shadow-lg shadow-pink-600/20 hover:shadow-pink-600/40 transform hover:scale-105 transition-all">
+                         قريباً 
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Our Products Section -->
+    <section class="py-20 bg-rekaz-accent relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-sm font-bold text-rekaz-primary tracking-wider uppercase mb-2">لماذا منتجاتنا</h2>
+                <h3 class="text-4xl font-black text-white">ميزات تجعلنا الأفضل</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="glass-card p-6 rounded-xl text-center reveal">
+                    <i class="fas fa-bolt text-4xl text-rekaz-primary mb-4"></i>
+                    <h4 class="text-xl font-bold text-white mb-2">جاهزة للعمل</h4>
+                    <p class="text-gray-400 text-sm">منتجات جاهزة للاستخدام فوراً بدون تأخير</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl text-center reveal" style="transition-delay: 0.1s;">
+                    <i class="fas fa-cogs text-4xl text-blue-400 mb-4"></i>
+                    <h4 class="text-xl font-bold text-white mb-2">قابلة للتخصيص</h4>
+                    <p class="text-gray-400 text-sm">إمكانية تخصيص المنظومة حسب احتياجاتك</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl text-center reveal" style="transition-delay: 0.2s;">
+                    <i class="fas fa-headset text-4xl text-pink-400 mb-4"></i>
+                    <h4 class="text-xl font-bold text-white mb-2">دعم فني مستمر</h4>
+                    <p class="text-gray-400 text-sm">فريق دعم متواجد لخدمتك على مدار الساعة</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl text-center reveal" style="transition-delay: 0.3s;">
+                    <i class="fas fa-shield-alt text-4xl text-green-400 mb-4"></i>
+                    <h4 class="text-xl font-bold text-white mb-2">آمنة ومحمية</h4>
+                    <p class="text-gray-400 text-sm">تطبيقات مؤمنة بأعلى معايير الحماية</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact / Footer Section -->
+    <section id="contact" class="pt-20 pb-10 bg-gradient-to-t from-black to-rekaz-accent border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- CTA Box -->
+            <div class="bg-rekaz-primary rounded-3xl p-10 md:p-16 text-center relative overflow-hidden mb-20 reveal shadow-2xl shadow-purple-900/30">
+                <div class="absolute top-0 left-0 w-full h-full bg-black opacity-10 pattern-dots"></div>
+                <h2 class="text-3xl md:text-5xl font-black text-white mb-6 relative z-10">مهتم بأحد منتجاتنا؟</h2>
+                <p class="text-white/90 text-xl mb-8 max-w-2xl mx-auto relative z-10 font-semibold">تواصل معنا الآن واحصل على عرض توضيحي مجاني لأي من منتجاتنا الاحترافية.</p>
+                 <div class="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+                    <a href="http://wa.me/218927597832" class="inline-block bg-white text-rekaz-primary px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all transform hover:-translate-y-1">
+                        تواصل واتساب
+                    </a>
+                    <a href="mailto:info@rekazcode.ly" class="inline-block border border-white/60 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-rekaz-primary transition-all transform hover:-translate-y-1">
+                        تواصل عبر الإيميل
+                    </a>
+                </div>
+                                </div>
+
+
+            <!-- Footer Content -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-gray-800 pb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <h2 class="text-3xl font-black text-white mb-6"><span class="text-rekaz-primary">RE</span>KAZ</h2>
+                    <p class="text-gray-500 max-w-sm leading-relaxed">
+                        نحن في ركاز نؤمن بأن الكود ليس مجرد أسطر، بل هو فن وهندسة تبني المستقبل. شريكك الاستراتيجي للتحول الرقمي.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-6">روابط سريعة</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="index.html" class="hover:text-rekaz-primary transition-colors">الرئيسية</a></li>
+                        <li><a href="index.html#about" class="hover:text-rekaz-primary transition-colors">عن الشركة</a></li>
+                        <li><a href="index.html#services" class="hover:text-rekaz-primary transition-colors">خدماتنا</a></li>
+                        <li><a href="products.html" class="hover:text-rekaz-primary transition-colors">منتجاتنا</a></li>
+                        <li><a href="#" class="hover:text-rekaz-primary transition-colors">سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-6">معلومات التواصل</h4>
+                    <ul class="space-y-4 text-gray-400">
+                        <li class="flex items-center group">
+                            <div class="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center ml-3 group-hover:bg-rekaz-primary group-hover:text-white transition-all">
+                                <i class="fas fa-map-marker-alt"></i>
+                             </div>
+                            <span>طربلس، ليبيا  </span>
+                        </li>
+                        <li class="flex items-center group">
+                            <div class="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center ml-3 group-hover:bg-rekaz-primary group-hover:text-white transition-all">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <span>info@rekazcode.ly</span>
+                        </li>
+                        <li class="flex items-center group">
+                            <div class="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center ml-3 group-hover:bg-rekaz-primary group-hover:text-white transition-all">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            
+                            <span dir="ltr">091 0086774</span>
+
+                        </li>
+                    </ul>
+                    
+                    <!-- Social Icons -->
+                    <div class="flex space-x-4 space-x-reverse mt-8">
+                        <a href="https://www.tiktok.com/@rekazcode?_r=1&_t=ZS-96QsYLUpfwz" class="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:border-rekaz-primary hover:text-rekaz-primary transition-all"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:border-rekaz-primary hover:text-rekaz-primary transition-all"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:border-rekaz-primary hover:text-rekaz-primary transition-all"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/share/1CVaQ2wh8B/?mibextid=wwXIfr" class="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:border-rekaz-primary hover:text-rekaz-primary transition-all"><i class="fab fa-facebook"></i></a>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 text-center text-gray-600 text-sm">
+                &copy; 2026 جميع الحقوق محفوظة لشركة ركاز للحلول البرمجية.
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script>
+        // 1. Navbar Blur Effect on Scroll
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-black/80', 'backdrop-blur-md', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-black/80', 'backdrop-blur-md', 'shadow-lg');
+            }
+        });
+
+        // 2. Mobile Menu Toggle
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 2.5 Theme Toggle (Light/Dark Mode)
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('#theme-toggle i');
+            
+            body.classList.toggle('light-mode');
+            
+            if (body.classList.contains('light-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.querySelector('#theme-toggle i');
+            
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                if (themeIcon) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            }
+        });
+
+        // 3. Scroll Reveal Animation (Intersection Observer)
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 4. Canvas Particle Animation (The "Tech" Background)
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = (Math.random() * 3) - 1.5;
+                this.speedY = (Math.random() * 3) - 1.5;
+                // Updated to Purple: rgba(122, 66, 197, 0.2)
+                this.color = 'rgba(122, 66, 197, 0.2)'; 
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                connect();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function connect() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                    + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width/7) * (canvas.height/7)) {
+                        let opacityValue = 1 - (distance / 20000);
+                        // Updated line color to Purple
+                        ctx.strokeStyle = 'rgba(122, 66, 197,' + opacityValue * 0.15 + ')'; 
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
